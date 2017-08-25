@@ -1,0 +1,16 @@
+*.pyo
+*.pyc
+*.sublime-project
+*.sublime-workspace
+.hidden
+.directory
+.gitold
+.sublime-backup
+obsolete
+research
+docs/specs.md
+docs/todo.md
+docs/description.html
+tools/test.py
+internal_references/forms
+internal-references-*.zip
