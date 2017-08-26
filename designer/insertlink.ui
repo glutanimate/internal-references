@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>470</width>
-    <height>327</height>
+    <width>466</width>
+    <height>356</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -50,7 +50,7 @@
          <item>
           <widget class="QPushButton" name="btnSel">
            <property name="text">
-            <string>&amp;Select Note / Card / Search term</string>
+            <string>&amp;Select Card / Search</string>
            </property>
            <property name="default">
             <bool>false</bool>
@@ -156,6 +156,9 @@
          </item>
          <item>
           <widget class="QRadioButton" name="rbPreview">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="text">
             <string>Open &amp;Previewer</string>
            </property>
@@ -184,11 +187,14 @@
          </item>
          <item>
           <widget class="QLineEdit" name="teHighlight">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="alignment">
             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
            </property>
            <property name="placeholderText">
-            <string>Phrase to highlight on opening dialog</string>
+            <string>Phrase to highlight on showing card</string>
            </property>
           </widget>
          </item>
@@ -215,6 +221,13 @@
     </layout>
    </item>
    <item>
+    <widget class="QLabel" name="labNotCard">
+     <property name="text">
+      <string>Previewing items and highlighting terms only works for single cards</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
@@ -229,6 +242,9 @@
    </item>
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
@@ -245,8 +261,8 @@
   <tabstop>teName</tabstop>
   <tabstop>rbBrowse</tabstop>
   <tabstop>rbPreview</tabstop>
-  <tabstop>buttonBox</tabstop>
   <tabstop>teHighlight</tabstop>
+  <tabstop>buttonBox</tabstop>
  </tabstops>
  <resources/>
  <connections>

@@ -18,7 +18,7 @@ from anki.hooks import addHook
 from .consts import *
 from .insertlink import InsertLink
 from . import browser
-from . import linkhandlers
+from . import linkhandler
 
 
 def onInsertInternalReference(self):

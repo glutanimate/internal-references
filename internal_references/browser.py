@@ -9,6 +9,8 @@ Copyright: (c) Glutanimate 2017 <https://glutanimate.com/>
 License: GNU AGPLv3 or later <https://www.gnu.org/licenses/agpl.html>
 """
 
+from __future__ import unicode_literals
+
 from aqt.qt import *
 from aqt.utils import tooltip
 
@@ -17,7 +19,8 @@ from aqt.browser import Browser
 
 from .consts import *
 
-def createInsertlinkSelector(self, insertLink):
+
+def createInsertlinkSelector(self, insertLink, search):
     self.insertLink = insertLink
 
     target = self.form.verticalLayout_2
@@ -48,11 +51,10 @@ def createInsertlinkSelector(self, insertLink):
         activated=btnCard.animateClick)
     QShortcut(QKeySequence(HOTKEY_BROWSER_SEARCH), self,
         activated=btnSearch.animateClick)
-    
-    def onClose(evt):
-        insertLink.browser = None
 
-    self.closeEvent = wrap(self.closeEvent, onClose, "after")
+    self.form.searchEdit.lineEdit().setText(search or "deck:current")
+    self.onSearch()
+
 
 def onInsertLinkButton(self, btn):
     if btn == "card":

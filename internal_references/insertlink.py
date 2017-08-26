@@ -24,8 +24,9 @@ class InsertLink(QDialog):
     """Link Insertion Dialog"""
 
     bridge = "py.link"
-    link_format = ('''<a href='#' class="ilink" '''
-                   '''onclick='{bridge}("{command}");'>{label}</a>''')
+    link = ('''<a href="" class="ilink" '''
+            '''onclick='{bridge}("{command}"); return false;'>{text}</a>''')
+    command = "ilink:{dialog}:::{highlight}:::{search}"
 
     def __init__(self, editor, parent, selected):
         super(InsertLink, self).__init__(parent=parent)
@@ -42,22 +43,35 @@ class InsertLink(QDialog):
     #  UI
 
     def setupUi(self):
-        self.form.teSearch.setText(self.selected)
+        self.form.teName.setText(self.selected)
         self.form.teHighlight.setText(self.selected)
+        self.okButton = self.form.buttonBox.button(QDialogButtonBox.Ok)
+        self.okButton.setEnabled(False)
 
 
     def setupEvents(self):
         self.form.btnSel.clicked.connect(self.selectInBrowser)
-        self.okButton = self.form.buttonBox.button(QDialogButtonBox.Ok)
-        self.okButton.setEnabled(False)
-        self.form.teSearch.textChanged.connect(self.enableOk)
+        self.form.teSearch.textChanged.connect(self.enableWidgets)
 
 
-    def enableOk(self):
-        if self.form.teSearch.text():
+    def enableWidgets(self):
+        search = self.form.teSearch.text()
+        
+        if search:
             self.okButton.setEnabled(True)
         else:
             self.okButton.setEnabled(False)
+        
+        if search.startswith(('"cid:', 'cid:')):
+            self.form.rbPreview.setEnabled(True)
+            self.form.teHighlight.setEnabled(True)
+            self.form.labNotCard.setText("")
+        else:
+            self.form.rbPreview.setEnabled(False)
+            self.form.teHighlight.setEnabled(False)
+            self.form.labNotCard.setText(
+                """Previewing items and highlighting """
+                """terms only works for single cards.""")
 
     # Editor
 
@@ -78,27 +92,43 @@ class InsertLink(QDialog):
         return result
 
 
-    def createAnchor(self, url, text, highlight, preview):
+    def createAnchor(self, search, text, highlight, preview):
         """
-        Create a hyperlink string, where `url` is the hyperlink reference
+        Create a hyperlink string, where `search` is the hyperlink reference
         and `text` the content of the tag.
         """
+        if preview:
+            dialog = "preview"
+        else:
+            dialog = "browse"
+        
         text = self.escapeHtmlCharacters(text)
 
-        return u"<a href=\"{0}\">{1}</a>".format(url, text or url)
+        command = self.command.format(
+            dialog=dialog, highlight=highlight, search=search)
+
+        anchor = self.link.format(
+            bridge=self.bridge, command=command, text=text or search)
+
+        return anchor
 
 
     def insertAnchor(self):
         """
         Inserts a HTML anchor `<a>` into the text field.
         """
-        url = self.form.teSearch.text()
-        text = self.form.teName.text()
-        highlight = self.form.teHighlight.text()
-        preview = self.form.rbBrowse.isChecked()
+        search = self.form.teSearch.text().strip()
+        text = self.form.teName.text().strip()
+        if search.startswith(('"cid:', 'cid:')):
+            highlight = self.form.teHighlight.text().strip()
+        else:
+            highlight = ""
+        preview = self.form.rbPreview.isChecked()
 
-        anchor = self.createAnchor(url, text, highlight, preview)
+        anchor = self.createAnchor(search, text, highlight, preview)
 
+        self.editor.web.setFocus()
+        self.editor.web.eval("focusField(%d);" % self.editor.currentField)
         self.editor.web.eval(
             "document.execCommand('insertHTML', false, %s);"
             % json.dumps(anchor))
@@ -106,8 +136,9 @@ class InsertLink(QDialog):
     # Browser
     
     def selectInBrowser(self):
+        search = self.form.teName.text().strip() 
         browser = aqt.dialogs.open("Browser", aqt.mw)
-        browser.createInsertlinkSelector(self)
+        browser.createInsertlinkSelector(self, search)
         self.browser = browser
 
 
