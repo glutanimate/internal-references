@@ -10,3 +10,31 @@ License: GNU AGPLv3 <https://www.gnu.org/licenses/agpl.html>
 """
 
 from __future__ import unicode_literals
+
+from aqt.editor import Editor
+from aqt.utils import tooltip
+from anki.hooks import addHook
+
+from .consts import *
+from .insertlink import InsertLink
+from . import browser
+from . import linkhandlers
+
+
+def onInsertInternalReference(self):
+    """Get selection, call link inserter"""
+    selected = self.web.selectedText()
+    parent = self.parentWindow
+    dialog = InsertLink(self, parent, selected)
+    dialog.show()
+
+
+def onSetupButtons(self):
+    """Add buttons to editor"""
+    self._addButton("contents", self.onInsertInternalReference,
+        tip="Insert link to internal reference ({})".format(HOTKEY_EDITOR),
+        key=HOTKEY_EDITOR)
+
+
+Editor.onInsertInternalReference = onInsertInternalReference
+addHook("setupEditorButtons", onSetupButtons)
