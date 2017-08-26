@@ -11,6 +11,7 @@ License: GNU AGPLv3 <https://www.gnu.org/licenses/agpl.html>
 
 from __future__ import unicode_literals
 
+from aqt.qt import *
 from aqt.editor import Editor
 from aqt.utils import tooltip
 from anki.hooks import addHook
@@ -23,9 +24,25 @@ from . import linkhandler
 
 def onInsertInternalReference(self):
     """Get selection, call link inserter"""
-    selected = self.web.selectedText()
+    # will have to use asynchronous callback on 2.1
+    data_tuple = self.web.page().mainFrame().evaluateJavaScript("""
+        function getSelectionData() {
+           var node = document.getSelection().anchorNode;
+           var text = node.textContent
+           var data = node.parentNode.getAttribute('data-a');
+           return [text, data]
+        }
+        getSelectionData()
+        """)
+    if not data_tuple[1] or isinstance(data_tuple[1], QPyNullVariant):
+        data_string = None
+        selected = self.web.selectedText()
+    else:
+        selected, data_string = data_tuple
+
     parent = self.parentWindow
-    dialog = InsertLink(self, parent, selected)
+    dialog = InsertLink(
+        self, parent, selected=selected, data_string=data_string)
     dialog.show()
 
 
