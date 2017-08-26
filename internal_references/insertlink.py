@@ -16,7 +16,7 @@ from aqt.qt import *
 from anki.utils import json
 
 from .consts import *
-from .linkhandler import escapeHTML
+from .utils import dataEncode
 from .forms4 import insertlink
 
 
@@ -25,8 +25,7 @@ class InsertLink(QDialog):
 
     bridge = "py.link"
     link = ('''<a href="" class="ilink" '''
-            '''onclick='{bridge}("{command}"); return false;'>{text}</a>''')
-    command = "ilink:{dialog}:::{highlight}:::{search}"
+            '''onclick='{bridge}("ilink:{data}"); return false;'>{text}</a>''')
 
     def __init__(self, editor, parent, selected):
         super(InsertLink, self).__init__(parent=parent)
@@ -38,7 +37,7 @@ class InsertLink(QDialog):
         self.form.setupUi(self)
         self.setupEvents()
         self.setupUi()
-        self.form.btnSel.setFocus()
+        self.form.teSearch.setFocus()
 
     #  UI
 
@@ -77,22 +76,24 @@ class InsertLink(QDialog):
 
 
     def createAnchor(self, search, text, highlight, preview):
-        """Create a hyperlink string"""
+        """
+        Create a hyperlink string
+        """
         if preview:
             dialog = "preview"
         else:
             dialog = "browse"
         
-        search = escapeHTML(search)
-        highlight = escapeHTML(highlight)
+        data_dict = {
+            "dlg": dialog,
+            "src": search,
+            "hlt": highlight
+        }
 
-        command = self.command.format(
-            dialog=dialog, highlight=highlight, search=search)
-
-        print("command", command)
+        data = dataEncode(data_dict)
 
         anchor = self.link.format(
-            bridge=self.bridge, command=command, text=text or search)
+            bridge=self.bridge, data=data, text=text or search)
 
         return anchor
 
@@ -102,12 +103,13 @@ class InsertLink(QDialog):
         Inserts an HTML anchor `<a>` into the text field.
         """
         search = self.form.teSearch.text().strip()
-        print("search", search)
         text = self.form.teName.text().strip()
+
         if search.startswith(('"cid:', 'cid:')):
             highlight = self.form.teHighlight.text().strip()
         else:
             highlight = ""
+
         preview = self.form.rbPreview.isChecked()
 
         anchor = self.createAnchor(search, text, highlight, preview)
@@ -121,7 +123,7 @@ class InsertLink(QDialog):
     # Browser
     
     def selectInBrowser(self):
-        search = self.form.teName.text().strip() 
+        search = self.form.teSearcg.text().strip() 
         browser = aqt.dialogs.open("Browser", aqt.mw)
         browser.createInsertlinkSelector(self, search)
         self.browser = browser

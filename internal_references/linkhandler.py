@@ -19,39 +19,7 @@ from aqt.editor import EditorWebView
 
 from anki.hooks import wrap, addHook
 
-html_escape_table = {
-    "&": "&amp;",
-    '"': "&dquot;",
-    "'": "&squot;",
-    ">": "&gt;",
-    "<": "&lt;",
-}
-html_unescape_table = {v:k for k, v in html_escape_table.items()}
-
-def escapeHTML(text):
-    """Escape HTML characters in a string. Return a safe string."""
-    if not text:
-        return u""
-    result = u"".join(html_escape_table.get(c, c) for c in text)
-    return result
-
-def unescapeHTML(text):
-    """Unescape HTML characters in a string. Return a regular string."""
-    if not text:
-        return u""
-    result = text
-    for orig, new in html_unescape_table.items():
-        result = result.replace(orig, new)
-    print("unescaped", result)
-    return result
-
-def parseUrl(url):
-    cmdstr, highlight, search = url.split(":::")
-    cmd, dialog = cmdstr.split(":")
-    search = unescapeHTML(search)
-    highlight = unescapeHTML(highlight)
-    print(cmd, dialog, highlight, search)
-    return cmd, dialog, highlight, search
+from .utils import dataDecode
 
 
 def linkHandler(self, url, _old=None):
@@ -61,7 +29,14 @@ def linkHandler(self, url, _old=None):
         else:
             return openLink(url)
     
-    cmd, dialog, highlight, search = parseUrl(url)
+    cmd, data = url.split(":")
+    data_dict = dataDecode(data)
+    if not data_dict or data_dict == "corrupted":
+        return False
+
+    search = data_dict.get("src")
+    dialog = data_dict.get("dlg")
+    highlight = data_dict.get("hlt")
 
     if dialog == "preview":
         openPreviewLink(search, highlight)
