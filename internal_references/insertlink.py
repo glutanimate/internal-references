@@ -16,8 +16,8 @@ from aqt.qt import *
 from anki.utils import json
 
 from .consts import *
+from .linkhandler import escapeHTML
 from .forms4 import insertlink
-
 
 
 class InsertLink(QDialog):
@@ -75,37 +75,21 @@ class InsertLink(QDialog):
 
     # Editor
 
-    def escapeHtmlCharacters(self, text):
-        """
-        Escape HTML characters in a string. Return a safe string.
-        """
-        if not text:
-            return u""
-        html_escape_table = {
-            "&": "&amp;",
-            '"': "&quot;",
-            "'": "&apos;",
-            ">": "&gt;",
-            "<": "&lt;",
-        }
-        result = u"".join(html_escape_table.get(c, c) for c in text)
-        return result
-
 
     def createAnchor(self, search, text, highlight, preview):
-        """
-        Create a hyperlink string, where `search` is the hyperlink reference
-        and `text` the content of the tag.
-        """
+        """Create a hyperlink string"""
         if preview:
             dialog = "preview"
         else:
             dialog = "browse"
         
-        text = self.escapeHtmlCharacters(text)
+        search = escapeHTML(search)
+        highlight = escapeHTML(highlight)
 
         command = self.command.format(
             dialog=dialog, highlight=highlight, search=search)
+
+        print("command", command)
 
         anchor = self.link.format(
             bridge=self.bridge, command=command, text=text or search)
@@ -115,9 +99,10 @@ class InsertLink(QDialog):
 
     def insertAnchor(self):
         """
-        Inserts a HTML anchor `<a>` into the text field.
+        Inserts an HTML anchor `<a>` into the text field.
         """
         search = self.form.teSearch.text().strip()
+        print("search", search)
         text = self.form.teName.text().strip()
         if search.startswith(('"cid:', 'cid:')):
             highlight = self.form.teHighlight.text().strip()

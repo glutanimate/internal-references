@@ -19,10 +19,37 @@ from aqt.editor import EditorWebView
 
 from anki.hooks import wrap, addHook
 
+html_escape_table = {
+    "&": "&amp;",
+    '"': "&dquot;",
+    "'": "&squot;",
+    ">": "&gt;",
+    "<": "&lt;",
+}
+html_unescape_table = {v:k for k, v in html_escape_table.items()}
+
+def escapeHTML(text):
+    """Escape HTML characters in a string. Return a safe string."""
+    if not text:
+        return u""
+    result = u"".join(html_escape_table.get(c, c) for c in text)
+    return result
+
+def unescapeHTML(text):
+    """Unescape HTML characters in a string. Return a regular string."""
+    if not text:
+        return u""
+    result = text
+    for orig, new in html_unescape_table.items():
+        result = result.replace(orig, new)
+    print("unescaped", result)
+    return result
 
 def parseUrl(url):
     cmdstr, highlight, search = url.split(":::")
     cmd, dialog = cmdstr.split(":")
+    search = unescapeHTML(search)
+    highlight = unescapeHTML(highlight)
     print(cmd, dialog, highlight, search)
     return cmd, dialog, highlight, search
 
@@ -44,7 +71,7 @@ def linkHandler(self, url, _old=None):
 
 def openBrowseLink(search, highlight):
     browser = aqt.dialogs.open("Browser", aqt.mw)
-    query = '''"{}"'''.format(search)
+    query = '''{}'''.format(search)
     browser.form.searchEdit.lineEdit().setText(query)
     browser.onSearch()
     if not highlight or not browser.editor:
