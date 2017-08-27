@@ -1,16 +1,35 @@
 ## Internal References Add-on for Anki
 
-This is an add-on for the spaced-repetition flashcard app [Anki](https://apps.ankiweb.net/)
+This is an add-on for the spaced-repetition flashcard app [Anki](https://apps.ankiweb.net/). It's primary purpose lies in linking multiple notes together.
 
 ### Table of Contents
 
 <!-- MarkdownTOC -->
 
+- [Screenshots](#screenshots)
+- [Installation](#installation)
+- [Documentation](#documentation)
+- [License and Credits](#license-and-credits)
+
 <!-- /MarkdownTOC -->
 
 ### Screenshots
 
-![](screenshots/screenshot.png)
+*Link creation dialog:*
+
+![](screenshots/linkinserter.png)
+
+*Card selection widgets in the card browser:*
+
+![](screenshots/browser.png)
+
+*Generated link*:
+
+![](screenshots/editor.png)
+
+*Custom previewer invoked on clicking the link:*
+
+![](screenshots/previewer.png)
 
 ### Installation
 
