@@ -38,13 +38,15 @@ def createInsertlinkSelector(self, insertLink, search, highlight):
     btnSearch.setToolTip("Hotkey: {}".format(HOTKEY_BROWSER_SEARCH))
     btnSearch.clicked.connect(lambda: self.onInsertLinkButton("search"))
     btnSearch.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-    
+
     layout.addStretch()
     layout.addWidget(label)
     spacer = QSpacerItem(20, 0, QSizePolicy.Fixed, QSizePolicy.Minimum)
     layout.addItem(spacer)
     layout.addWidget(btnCard)
     layout.addWidget(btnSearch)
+    selector.setMaximumHeight(50)
+    selector.setMinimumHeight(50)
     target.addWidget(selector)
 
     QShortcut(QKeySequence(HOTKEY_BROWSER_CARD), self,
