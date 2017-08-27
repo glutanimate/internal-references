@@ -7,7 +7,7 @@ Entry point for the add-on into Anki
 
 Please do not edit this if you do not know what you are doing.
 
-Copyright: (c) Glutanimate 2017 <https://glutanimate.com/>
+Copyright: (c) 2017 Glutanimate <https://glutanimate.com/>
 License: GNU AGPLv3 <https://www.gnu.org/licenses/agpl.html>
 """
 

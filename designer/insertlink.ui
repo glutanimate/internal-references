@@ -157,7 +157,7 @@
          <item>
           <widget class="QRadioButton" name="rbPreview">
            <property name="enabled">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="text">
             <string>Open &amp;Previewer</string>
@@ -188,7 +188,7 @@
          <item>
           <widget class="QLineEdit" name="teHighlight">
            <property name="enabled">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="alignment">
             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>

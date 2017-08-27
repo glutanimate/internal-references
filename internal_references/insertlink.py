@@ -3,9 +3,9 @@
 """
 This file is part of the Internal References add-on for Anki
 
-Associated dialogs
+InsertLink dialog
 
-Copyright: (c) Glutanimate 2017 <https://glutanimate.com/>
+Copyright: (c) 2017 Glutanimate <https://glutanimate.com/>
 License: GNU AGPLv3 or later <https://www.gnu.org/licenses/agpl.html>
 """
 
@@ -22,10 +22,10 @@ from .forms4 import insertlink
 
 
 class InsertLink(QDialog):
-    """Link Insertion Dialog"""
+    """Link insertion dialog"""
 
     bridge = "py.link"
-    link = ('''<a href="" class="ilink" data-a="{{data}}" '''
+    link = ('''<a href="" class="ilink" data-a="{{data}}" {{ciddata}} '''
             '''onclick='{bridge}("ilink:" + this.dataset.a); return false;'>'''
             '''{{text}}</a>'''.format(bridge=bridge))
 
@@ -36,9 +36,9 @@ class InsertLink(QDialog):
         self.parent = parent
         self.form = insertlink.Ui_Dialog()
         self.form.setupUi(self)
-        self.setupEvents()
         self.setupUi()
         self.setInitial(selected, data_string)
+        self.setupEvents()
         self.form.teSearch.setFocus()
 
     #  UI
@@ -53,7 +53,7 @@ class InsertLink(QDialog):
         self.form.teSearch.textChanged.connect(self.enableWidgets)
 
 
-    def enableWidgets(self):
+    def enableWidgets(self, initial=False):
         search = self.form.teSearch.text()
         
         if search:
@@ -63,10 +63,14 @@ class InsertLink(QDialog):
         
         if search.startswith(('"cid:', 'cid:')):
             self.form.rbPreview.setEnabled(True)
+            if PREVIEW_BY_DEFAULT and not initial:
+                self.form.rbPreview.setChecked(True)
             self.form.teHighlight.setEnabled(True)
             self.form.labNotCard.setText("")
         else:
             self.form.rbPreview.setEnabled(False)
+            if PREVIEW_BY_DEFAULT and not initial:
+                self.form.rbBrowse.setChecked(True)
             self.form.teHighlight.setEnabled(False)
             self.form.labNotCard.setText(
                 """Previewing items and highlighting """
@@ -87,13 +91,14 @@ class InsertLink(QDialog):
             self.form.teSearch.setText(search)
             self.form.teHighlight.setText(highlight)
             if dialog == "preview":
-                self.form.rbPreview.setEnabled(True)
+                self.form.rbPreview.setChecked(True)
         else:
             self.form.teHighlight.setText(selected)
         self.form.teName.setText(selected)
+        self.enableWidgets(initial=True)
 
 
-    def createAnchor(self, search, text, highlight, preview):
+    def createAnchor(self, search, text, highlight, preview, ciddata):
         """
         Create a hyperlink string
         """
@@ -111,7 +116,7 @@ class InsertLink(QDialog):
         data = dataEncode(data_dict)
 
         anchor = self.link.format(
-            data=data, text=text or search)
+            data=data, ciddata=ciddata, text=text or search)
 
         return anchor
 
@@ -125,25 +130,42 @@ class InsertLink(QDialog):
 
         if search.startswith(('"cid:', 'cid:')):
             highlight = self.form.teHighlight.text().strip()
+            cid = search.split(":")[1]
+            ciddata = 'data-cid="{}"'.format(cid)
         else:
             highlight = ""
+            ciddata = ""
 
         preview = self.form.rbPreview.isChecked()
 
-        anchor = self.createAnchor(search, text, highlight, preview)
+        anchor = self.createAnchor(search, text, highlight, preview, ciddata)
 
         self.editor.web.setFocus()
         self.editor.web.eval("focusField(%d);" % self.editor.currentField)
-        self.editor.web.eval(
-            "document.execCommand('insertHTML', false, %s);"
-            % json.dumps(anchor))
+        # replace or insert new anchor:
+        self.editor.web.eval("""
+            function replaceOrInsertHTML(html) {
+               var parent = document.getSelection().anchorNode.parentNode;
+               var parent_name = parent.nodeName.toLowerCase()
+               var parent_class = parent.className
+               if (parent_name === "a" && parent_class === "ilink") {
+                    var newAnchor = document.createElement("a")
+                    newAnchor.innerHTML = html
+                    parent.parentNode.replaceChild(newAnchor, parent);
+               } else {
+                    document.execCommand('insertHTML', false, html);
+               }
+            }
+            replaceOrInsertHTML(%s)
+            """ % json.dumps(anchor))
 
     # Browser
     
     def selectInBrowser(self):
-        search = self.form.teSearch.text().strip() 
+        search = self.form.teSearch.text().strip()
+        highlight = self.form.teHighlight.text().strip()
         browser = aqt.dialogs.open("Browser", aqt.mw)
-        browser.createInsertlinkSelector(self, search)
+        browser.createInsertlinkSelector(self, search, highlight)
         self.browser = browser
 
 
@@ -152,9 +174,13 @@ class InsertLink(QDialog):
             self.browser.close()
 
 
-    def onConfirmBrowserSelection(self, search):
+    def onConfirmBrowser(self, search, highlight):
         if search:
             self.form.teSearch.setText(search)
+        if highlight:
+            self.form.teHighlight.setText(highlight)
+            if not self.form.teName.text():
+                self.form.teName.setText(highlight)
         self.browser = None
 
     # Close events

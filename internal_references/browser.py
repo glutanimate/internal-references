@@ -5,7 +5,7 @@ This file is part of the Internal References add-on for Anki
 
 Modifications to Anki's card browser
 
-Copyright: (c) Glutanimate 2017 <https://glutanimate.com/>
+Copyright: (c) 2017 Glutanimate <https://glutanimate.com/>
 License: GNU AGPLv3 or later <https://www.gnu.org/licenses/agpl.html>
 """
 
@@ -20,10 +20,10 @@ from aqt.browser import Browser
 from .consts import *
 
 
-def createInsertlinkSelector(self, insertLink, search):
+def createInsertlinkSelector(self, insertLink, search, highlight):
     self.insertLink = insertLink
 
-    target = self.form.verticalLayout_2
+    target = self.form.verticalLayout_3
     selector = QWidget()
     layout = QHBoxLayout(selector)
     
@@ -39,13 +39,13 @@ def createInsertlinkSelector(self, insertLink, search):
     btnSearch.clicked.connect(lambda: self.onInsertLinkButton("search"))
     btnSearch.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
     
+    layout.addStretch()
     layout.addWidget(label)
     spacer = QSpacerItem(20, 0, QSizePolicy.Fixed, QSizePolicy.Minimum)
     layout.addItem(spacer)
     layout.addWidget(btnCard)
     layout.addWidget(btnSearch)
-    layout.addStretch()
-    target.insertWidget(0, selector)
+    target.addWidget(selector)
 
     QShortcut(QKeySequence(HOTKEY_BROWSER_CARD), self,
         activated=btnCard.animateClick)
@@ -54,6 +54,11 @@ def createInsertlinkSelector(self, insertLink, search):
 
     self.form.searchEdit.lineEdit().setText(search or "deck:current")
     self.onSearch()
+
+    if highlight and self.editor:
+        self.editor.web.findText(highlight,
+            QWebPage.HighlightAllOccurrences)
+        self.editor.web.findText(highlight)
 
 
 def onInsertLinkButton(self, btn):
@@ -68,7 +73,11 @@ def onInsertLinkButton(self, btn):
         search = "cid:{}".format(cids[0])
     elif btn == "search":
         search = self.form.searchEdit.lineEdit().text()
-    self.insertLink.onConfirmBrowserSelection(search)
+    if self.editor:
+        highlight = self.editor.web.selectedText()
+    else:
+        highlight = ""
+    self.insertLink.onConfirmBrowser(search, highlight)
     self.close()
 
 

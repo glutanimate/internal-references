@@ -5,7 +5,7 @@ This file is part of the Internal References add-on for Anki
 
 Main Module, hooks add-on methods into Anki
 
-Copyright: (c) Glutanimate 2017 <https://glutanimate.com/>
+Copyright: (c) 2017 Glutanimate <https://glutanimate.com/>
 License: GNU AGPLv3 <https://www.gnu.org/licenses/agpl.html>
 """
 
@@ -19,12 +19,12 @@ from anki.hooks import addHook
 from .consts import *
 from .insertlink import InsertLink
 from . import browser
-from . import linkhandler
+from . import linkhandlers
 
 
 def onInsertInternalReference(self):
     """Get selection, call link inserter"""
-    # will have to use asynchronous callback on 2.1
+    # will have to use asynchronous callback on 2.1:
     data_tuple = self.web.page().mainFrame().evaluateJavaScript("""
         function getSelectionData() {
            var node = document.getSelection().anchorNode;
