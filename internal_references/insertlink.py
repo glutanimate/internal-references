@@ -9,7 +9,7 @@ Copyright: (c) 2017 Glutanimate <https://glutanimate.com/>
 License: GNU AGPLv3 or later <https://www.gnu.org/licenses/agpl.html>
 """
 
-from __future__ import unicode_literals
+
 
 
 import aqt
