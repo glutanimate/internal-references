@@ -58,8 +58,6 @@ def createInsertlinkSelector(self: Browser, insertLink, search, highlight):
     self.onSearchActivated()
 
     if highlight and self.editor:
-        self.editor.web.findText(highlight,
-            QWebPage.HighlightAllOccurrences)
         self.editor.web.findText(highlight)
 
 
