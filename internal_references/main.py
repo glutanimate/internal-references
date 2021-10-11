@@ -15,6 +15,7 @@ from aqt.qt import *
 from aqt.editor import Editor
 from aqt.utils import tooltip
 from anki.hooks import addHook
+import os
 
 from .consts import *
 from .insertlink import InsertLink
@@ -52,7 +53,8 @@ def onInsertInternalReference(self: Editor):
 
 def onSetupButtons(buttons, editor):
     """Add buttons to editor"""
-    b = editor.addButton("contents", "IR", lambda o=editor: onInsertInternalReference(o),
+    icon_path = os.path.join(os.path.dirname(__file__), "link.png")
+    b = editor.addButton(icon_path, "IR", lambda o=editor: onInsertInternalReference(o),
         tip="Insert link to internal reference ({})".format(HOTKEY_EDITOR),
         keys=HOTKEY_EDITOR)
     buttons.append(b)
