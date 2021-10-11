@@ -121,6 +121,7 @@ class CardPreviewer(QDialog):
                 # if we really need it
                 # bodyClass="card card%d" % (card.ord+1), 
                 head=base, js=None)
+            self.web.eval("document.body.className += ' card';")
 
         # Handle audio
         clearAudioQueue()
