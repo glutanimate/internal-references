@@ -20,7 +20,7 @@ from aqt.browser import Browser
 from .consts import *
 
 
-def createInsertlinkSelector(self, insertLink, search, highlight):
+def createInsertlinkSelector(self: Browser, insertLink, search, highlight):
     self.insertLink = insertLink
 
     target = self.form.verticalLayout_3
@@ -55,7 +55,7 @@ def createInsertlinkSelector(self, insertLink, search, highlight):
         activated=btnSearch.animateClick)
 
     self.form.searchEdit.lineEdit().setText(search or "deck:current")
-    self.onSearch()
+    self.onSearchActivated()
 
     if highlight and self.editor:
         self.editor.web.findText(highlight,
