@@ -26,7 +26,7 @@ def dataEncode(data):
     if not data:
         return ""
 
-    encoded = str(base64.b64encode(json.dumps(data)))
+    encoded = str(base64.b64encode(bytes(json.dumps(data), encoding='utf8')))
     return encoded
 
 
