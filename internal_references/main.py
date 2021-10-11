@@ -46,11 +46,13 @@ def onInsertInternalReference(self):
     dialog.show()
 
 
-def onSetupButtons(self):
+def onSetupButtons(buttons, editor):
     """Add buttons to editor"""
-    self._addButton("contents", self.onInsertInternalReference,
+    b = editor.addButton("contents", "IR", lambda o=editor: onInsertInternalReference(o),
         tip="Insert link to internal reference ({})".format(HOTKEY_EDITOR),
-        key=HOTKEY_EDITOR)
+        keys=HOTKEY_EDITOR)
+    buttons.append(b)
+    return buttons
 
 
 Editor.onInsertInternalReference = onInsertInternalReference

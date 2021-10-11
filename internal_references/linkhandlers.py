@@ -13,21 +13,20 @@ License: GNU AGPLv3 or later <https://www.gnu.org/licenses/agpl.html>
 
 import aqt
 from aqt.qt import *
-from aqt import mw
+from aqt import mw, gui_hooks
 from aqt.webview import AnkiWebView
 from aqt.reviewer import Reviewer
 from aqt.editor import EditorWebView
 from aqt.utils import saveGeom, restoreGeom, openLink, \
-                      getBase, mungeQA, tooltip
+                      tooltip
 
 from anki.sound import clearAudioQueue, playFromText, play
-from anki.hooks import runFilter, wrap, addHook
-from anki.js import browserSel
+from anki.hooks import runFilter, wrap
 from anki.utils import stripHTML
 
 from .consts import *
 from .utils import dataDecode
-from .forms4 import previewer
+# from .forms4 import previewer
 
 
 # support for JS Booster add-on
@@ -48,7 +47,7 @@ class CardPreviewer(QDialog):
         self.mw = mw
         self.cid = cid
         self.highlight = highlight
-        self.form = previewer.Ui_Dialog()
+        self.form = aqt.forms.previewer.Ui_Dialog()
         self.form.setupUi(self)
         self.setupEvents()
         self.setupUi()
@@ -102,21 +101,21 @@ class CardPreviewer(QDialog):
         html = runFilter("previewerMungeQA", html)
 
         ti = lambda x: x
-        base = getBase(self.mw.col)
+        base = self.mw.baseHTML()
         css = self.mw.reviewer._styles()
         if preview_jsbooster:
             # JS Booster available
             baseUrlText = getBaseUrlText(self.mw.col) + "__previewer__.html"
             stdHtmlWithBaseUrl(self.web,
-                ti(mungeQA(self.mw.col, html)), baseUrlText, css,
+                ti(mw.prepare_card_text_for_display(html)), baseUrlText, css,
                 bodyClass="card card%d" % (card.ord+1), 
-                head=base, js=browserSel)
+                head=base, js=None)
         else:
             # fall back to default
             self.web.stdHtml(
-                ti(mungeQA(self.mw.col, html)), css, 
+                mw.prepare_card_text_for_display(html), css, 
                 bodyClass="card card%d" % (card.ord+1), 
-                head=base, js=browserSel)
+                head=base, js=None)
 
         # Handle audio
         clearAudioQueue()
@@ -198,14 +197,15 @@ def profileLoaded():
     Previewer.linkHandler = wrap(
         Previewer.linkHandler, hookedLinkHandler, "around")
 
-addHook("profileLoaded", profileLoaded)
+gui_hooks.profile_did_open.append(profileLoaded)
 
-## Editor
-def onEditorWebInit(self, parent, editor):
-    self.setLinkHandler(self._linkHandler)
+# ## Editor
+# def onEditorWebInit(self, parent, editor):
+#     self.setLinkHandler(self._linkHandler)
+#     mw.web
 
-EditorWebView._linkHandler = hookedLinkHandler
-EditorWebView.__init__ = wrap(EditorWebView.__init__, onEditorWebInit, "after")
+# EditorWebView._linkHandler = hookedLinkHandler
+# EditorWebView.__init__ = wrap(EditorWebView.__init__, onEditorWebInit, "after")
 
 ## Reviewer
 Reviewer._linkHandler = wrap(Reviewer._linkHandler, hookedLinkHandler, "around")

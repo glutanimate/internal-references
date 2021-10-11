@@ -14,12 +14,10 @@ License: GNU AGPLv3 or later <https://www.gnu.org/licenses/agpl.html>
 
 import aqt
 from aqt.qt import *
-from anki.utils import json
+import json
 
 from .consts import *
 from .utils import dataEncode, dataDecode
-from .forms4 import insertlink
-
 
 class InsertLink(QDialog):
     """Link insertion dialog"""
@@ -34,7 +32,7 @@ class InsertLink(QDialog):
         self.editor = editor
         self.browser = None
         self.parent = parent
-        self.form = insertlink.Ui_Dialog()
+        self.form = aqt.forms.insertlink.Ui_Dialog()
         self.form.setupUi(self)
         self.setupUi()
         self.setInitial(selected, data_string)

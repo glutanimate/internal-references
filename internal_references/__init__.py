@@ -1,2 +1,7 @@
 # -*- coding: utf-8 -*-
-# required for this directory to be recognized as a package
+# Starting point for code, I think
+import sys
+sys.stdout = open('C:/Users/seand/Desktop/log.txt', 'w')
+print('test')
+
+from . import main

@@ -15,7 +15,7 @@ License: GNU AGPLv3 or later <https://www.gnu.org/licenses/agpl.html>
 """
 
 import base64
-from anki import json
+import json
 
 
 def dataEncode(data):
