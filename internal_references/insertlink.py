@@ -23,9 +23,9 @@ from .insertlink_ui import Ui_Dialog
 class InsertLink(QDialog):
     """Link insertion dialog"""
 
-    bridge = "py.link"
+    bridge = "pycmd"
     link = ('''<a href="" class="ilink" data-a="{{data}}" {{ciddata}} '''
-            '''onclick='{bridge}("ilink:" + this.dataset.a); return false;'>'''
+            '''onclick="{bridge}('ilink:' + this.dataset.a); return false;">'''
             '''{{text}}</a>'''.format(bridge=bridge))
 
     def __init__(self, editor, parent, selected=None, data_string=None):

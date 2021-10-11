@@ -13,7 +13,8 @@ License: GNU AGPLv3 or later <https://www.gnu.org/licenses/agpl.html>
 
 import aqt
 from aqt.qt import *
-from aqt import mw, gui_hooks
+from aqt import mw
+from anki.hooks import addHook
 from aqt.webview import AnkiWebView
 from aqt.reviewer import Reviewer
 from aqt.editor import EditorWebView
@@ -153,9 +154,11 @@ def hookedLinkHandler(self, url, _old=None):
 
 
 def linkHandler(url):
+    print('url', url)
     cmd, data = url.split(":")
     data_dict = dataDecode(data)
     if not data_dict or data_dict == "corrupted":
+        print('data_dict', data_dict)
         return False
 
     search = data_dict.get("src")
@@ -172,7 +175,7 @@ def openBrowseLink(search, highlight):
     browser = aqt.dialogs.open("Browser", aqt.mw)
     query = '''{}'''.format(search)
     browser.form.searchEdit.lineEdit().setText(query)
-    browser.onSearch()
+    browser.onSearchActivated()
     if not highlight or not browser.editor:
         return
     browser.editor.web.findText(highlight,
@@ -197,7 +200,7 @@ def profileLoaded():
     Previewer.linkHandler = wrap(
         Previewer.linkHandler, hookedLinkHandler, "around")
 
-gui_hooks.profile_did_open.append(profileLoaded)
+addHook("profileLoaded", profileLoaded)
 
 # ## Editor
 # def onEditorWebInit(self, parent, editor):
