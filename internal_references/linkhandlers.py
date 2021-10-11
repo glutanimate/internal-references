@@ -26,7 +26,7 @@ from anki.utils import stripHTML
 
 from .consts import *
 from .utils import dataDecode
-# from .forms4 import previewer
+from .previewer_ui import Ui_Dialog
 
 
 # support for JS Booster add-on
@@ -47,7 +47,7 @@ class CardPreviewer(QDialog):
         self.mw = mw
         self.cid = cid
         self.highlight = highlight
-        self.form = aqt.forms.previewer.Ui_Dialog()
+        self.form = Ui_Dialog()
         self.form.setupUi(self)
         self.setupEvents()
         self.setupUi()

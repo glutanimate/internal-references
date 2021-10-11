@@ -18,6 +18,7 @@ import json
 
 from .consts import *
 from .utils import dataEncode, dataDecode
+from .insertlink_ui import Ui_Dialog
 
 class InsertLink(QDialog):
     """Link insertion dialog"""
@@ -32,7 +33,7 @@ class InsertLink(QDialog):
         self.editor = editor
         self.browser = None
         self.parent = parent
-        self.form = aqt.forms.insertlink.Ui_Dialog()
+        self.form = Ui_Dialog()
         self.form.setupUi(self)
         self.setupUi()
         self.setInitial(selected, data_string)

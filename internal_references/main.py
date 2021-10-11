@@ -22,10 +22,24 @@ from . import browser
 from . import linkhandlers
 
 
-def onInsertInternalReference(self):
+def onInsertInternalReference(self: Editor):
     """Get selection, call link inserter"""
-    # will have to use asynchronous callback on 2.1:
-    data_tuple = self.web.page().mainFrame().evaluateJavaScript("""
+    # but first define an asynchronous callback
+    def on_result(data_tuple):
+        data_string = None
+        selected = None
+        if not data_tuple[1] or isinstance(data_tuple[1], QPyNullVariant):
+            data_string = None
+            selected = self.web.selectedText()
+        else:
+            selected, data_string = data_tuple
+        
+        parent = self.parentWindow
+        dialog = InsertLink(
+            self, parent, selected=selected, data_string=data_string)
+        dialog.show()
+    
+    self.web.page().runJavaScript("""
         function getSelectionData() {
            var node = document.getSelection().anchorNode;
            var text = node.textContent
@@ -33,17 +47,7 @@ def onInsertInternalReference(self):
            return [text, data]
         }
         getSelectionData()
-        """)
-    if not data_tuple[1] or isinstance(data_tuple[1], QPyNullVariant):
-        data_string = None
-        selected = self.web.selectedText()
-    else:
-        selected, data_string = data_tuple
-
-    parent = self.parentWindow
-    dialog = InsertLink(
-        self, parent, selected=selected, data_string=data_string)
-    dialog.show()
+        """, on_result)
 
 
 def onSetupButtons(buttons, editor):
