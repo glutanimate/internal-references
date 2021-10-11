@@ -13,6 +13,7 @@ License: GNU AGPLv3 or later <https://www.gnu.org/licenses/agpl.html>
 
 import aqt
 from aqt.qt import *
+from PyQt5.QtWebEngineWidgets import QWebEnginePage
 from aqt import mw
 from anki.hooks import addHook
 from aqt.webview import AnkiWebView
@@ -64,7 +65,8 @@ class CardPreviewer(QDialog):
 
     def setupUi(self):
         self.web = AnkiWebView()
-        self.web.setLinkHandler(linkHandler)
+        # looks like the linkHandler only exists in certain windows now
+        # self.web.setLinkHandler(linkHandler)
         self.form.verticalLayout.insertWidget(0, self.web)
 
 
@@ -78,7 +80,7 @@ class CardPreviewer(QDialog):
         Set title and webview HTML
         """
         try:
-            card = self.mw.col.getCard(cid)
+            card = self.mw.col.getCard(int(cid))
         except TypeError:
             tooltip("Could not find linked card with cid:'{}'.".format(cid))
             return False
@@ -103,19 +105,21 @@ class CardPreviewer(QDialog):
 
         ti = lambda x: x
         base = self.mw.baseHTML()
-        css = self.mw.reviewer._styles()
+        css = ["css/reviewer.css"]
         if preview_jsbooster:
             # JS Booster available
             baseUrlText = getBaseUrlText(self.mw.col) + "__previewer__.html"
             stdHtmlWithBaseUrl(self.web,
                 ti(mw.prepare_card_text_for_display(html)), baseUrlText, css,
-                bodyClass="card card%d" % (card.ord+1), 
+                # bodyClass="card card%d" % (card.ord+1), 
                 head=base, js=None)
         else:
             # fall back to default
             self.web.stdHtml(
                 mw.prepare_card_text_for_display(html), css, 
-                bodyClass="card card%d" % (card.ord+1), 
+                # looks like bodyClass is deprecated, we can add it in manually
+                # if we really need it
+                # bodyClass="card card%d" % (card.ord+1), 
                 head=base, js=None)
 
         # Handle audio
@@ -125,7 +129,7 @@ class CardPreviewer(QDialog):
 
 
     def setHighlight(self, highlight):
-        self.web.findText(highlight, QWebPage.HighlightAllOccurrences)
+        # I don't think this actually highlights anymore
         self.web.findText(highlight)
 
 
@@ -178,8 +182,7 @@ def openBrowseLink(search, highlight):
     browser.onSearchActivated()
     if not highlight or not browser.editor:
         return
-    browser.editor.web.findText(highlight,
-        QWebPage.HighlightAllOccurrences)
+    # this might not highlight anymore
     browser.editor.web.findText(highlight)
 
 
