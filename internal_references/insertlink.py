@@ -140,7 +140,7 @@ class InsertLink(QDialog):
         anchor = self.createAnchor(search, text, highlight, preview, ciddata)
 
         self.editor.web.setFocus()
-        self.editor.web.eval("focusField(%d);" % self.editor.currentField)
+        self.editor.web.eval("focusField(%d);" % self.editor.last_field_index)
         # replace or insert new anchor:
         self.editor.web.eval("""
             function replaceOrInsertHTML(html) {
