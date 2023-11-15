@@ -24,7 +24,7 @@ from aqt.utils import saveGeom, restoreGeom, openLink, \
 
 from anki.sound import clearAudioQueue, playFromText, play
 from anki.hooks import runFilter, wrap
-from anki.utils import stripHTML
+from anki.utils import strip_html
 
 from .consts import *
 from .utils import dataDecode
@@ -95,7 +95,7 @@ class CardPreviewer(QDialog):
             nid_idx = fnames.index("Note ID")
             if nid_idx == idx:
                 idx = min(idx+1, len(fields))
-        field1 = stripHTML(fields[idx])
+        field1 = strip_html(fields[idx])
         title = self.title.format(cid, field1[:50])
         self.setWindowTitle(title)
 
