@@ -43,7 +43,7 @@ class InsertLink(QDialog):
     #  UI
 
     def setupUi(self):
-        self.okButton = self.form.buttonBox.button(QDialogButtonBox.Ok)
+        self.okButton = self.form.buttonBox.button(QDialogButtonBox.StandardButton.Ok)
         self.okButton.setEnabled(False)
 
 
