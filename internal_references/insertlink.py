@@ -169,7 +169,7 @@ class InsertLink(QDialog):
 
 
     def closeBrowserInstance(self):
-        if self.browser:
+        if self.browser and not self.browser._closeEventHasCleanedUp:
             self.browser.close()
 
 
