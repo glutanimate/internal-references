@@ -9,7 +9,7 @@ Copyright: (c) 2017 Glutanimate <https://glutanimate.com/>
 License: GNU AGPLv3 or later <https://www.gnu.org/licenses/agpl.html>
 """
 
-from __future__ import unicode_literals
+
 
 from aqt.qt import *
 from aqt.utils import tooltip
@@ -20,7 +20,7 @@ from aqt.browser import Browser
 from .consts import *
 
 
-def createInsertlinkSelector(self, insertLink, search, highlight):
+def createInsertlinkSelector(self: Browser, insertLink, search, highlight):
     self.insertLink = insertLink
 
     target = self.form.verticalLayout_3
@@ -32,16 +32,16 @@ def createInsertlinkSelector(self, insertLink, search, highlight):
     btnCard = QPushButton("Current card")
     btnCard.setToolTip("Hotkey: {}".format(HOTKEY_BROWSER_CARD))
     btnCard.clicked.connect(lambda: self.onInsertLinkButton("card"))
-    btnCard.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+    btnCard.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
     
     btnSearch = QPushButton("Current search")
     btnSearch.setToolTip("Hotkey: {}".format(HOTKEY_BROWSER_SEARCH))
     btnSearch.clicked.connect(lambda: self.onInsertLinkButton("search"))
-    btnSearch.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+    btnSearch.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
 
     layout.addStretch()
     layout.addWidget(label)
-    spacer = QSpacerItem(20, 0, QSizePolicy.Fixed, QSizePolicy.Minimum)
+    spacer = QSpacerItem(20, 0, QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Minimum)
     layout.addItem(spacer)
     layout.addWidget(btnCard)
     layout.addWidget(btnSearch)
@@ -55,11 +55,9 @@ def createInsertlinkSelector(self, insertLink, search, highlight):
         activated=btnSearch.animateClick)
 
     self.form.searchEdit.lineEdit().setText(search or "deck:current")
-    self.onSearch()
+    self.onSearchActivated()
 
     if highlight and self.editor:
-        self.editor.web.findText(highlight,
-            QWebPage.HighlightAllOccurrences)
         self.editor.web.findText(highlight)
 
 

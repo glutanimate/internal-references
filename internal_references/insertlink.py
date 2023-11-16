@@ -9,24 +9,23 @@ Copyright: (c) 2017 Glutanimate <https://glutanimate.com/>
 License: GNU AGPLv3 or later <https://www.gnu.org/licenses/agpl.html>
 """
 
-from __future__ import unicode_literals
+
 
 
 import aqt
 from aqt.qt import *
-from anki.utils import json
+import json
 
 from .consts import *
 from .utils import dataEncode, dataDecode
-from .forms4 import insertlink
-
+from .insertlink_ui import Ui_Dialog
 
 class InsertLink(QDialog):
     """Link insertion dialog"""
 
-    bridge = "py.link"
+    bridge = "pycmd"
     link = ('''<a href="" class="ilink" data-a="{{data}}" {{ciddata}} '''
-            '''onclick='{bridge}("ilink:" + this.dataset.a); return false;'>'''
+            '''onclick="{bridge}('ilink:' + this.dataset.a); return false;">'''
             '''{{text}}</a>'''.format(bridge=bridge))
 
     def __init__(self, editor, parent, selected=None, data_string=None):
@@ -34,7 +33,7 @@ class InsertLink(QDialog):
         self.editor = editor
         self.browser = None
         self.parent = parent
-        self.form = insertlink.Ui_Dialog()
+        self.form = Ui_Dialog()
         self.form.setupUi(self)
         self.setupUi()
         self.setInitial(selected, data_string)
@@ -44,7 +43,7 @@ class InsertLink(QDialog):
     #  UI
 
     def setupUi(self):
-        self.okButton = self.form.buttonBox.button(QDialogButtonBox.Ok)
+        self.okButton = self.form.buttonBox.button(QDialogButtonBox.StandardButton.Ok)
         self.okButton.setEnabled(False)
 
 
@@ -141,7 +140,7 @@ class InsertLink(QDialog):
         anchor = self.createAnchor(search, text, highlight, preview, ciddata)
 
         self.editor.web.setFocus()
-        self.editor.web.eval("focusField(%d);" % self.editor.currentField)
+        self.editor.web.eval("focusField(%d);" % self.editor.last_field_index)
         # replace or insert new anchor:
         self.editor.web.eval("""
             function replaceOrInsertHTML(html) {
@@ -170,7 +169,7 @@ class InsertLink(QDialog):
 
 
     def closeBrowserInstance(self):
-        if self.browser:
+        if self.browser and not self.browser._closeEventHasCleanedUp:
             self.browser.close()
 
 

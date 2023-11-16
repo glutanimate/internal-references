@@ -9,25 +9,26 @@ Copyright: (c) 2017 Glutanimate <https://glutanimate.com/>
 License: GNU AGPLv3 or later <https://www.gnu.org/licenses/agpl.html>
 """
 
-from __future__ import unicode_literals
+
 
 import aqt
 from aqt.qt import *
+from PyQt5.QtWebEngineWidgets import QWebEnginePage
 from aqt import mw
+from anki.hooks import addHook
 from aqt.webview import AnkiWebView
 from aqt.reviewer import Reviewer
 from aqt.editor import EditorWebView
 from aqt.utils import saveGeom, restoreGeom, openLink, \
-                      getBase, mungeQA, tooltip
+                      tooltip
 
 from anki.sound import clearAudioQueue, playFromText, play
-from anki.hooks import runFilter, wrap, addHook
-from anki.js import browserSel
-from anki.utils import stripHTML
+from anki.hooks import runFilter, wrap
+from anki.utils import strip_html
 
 from .consts import *
 from .utils import dataDecode
-from .forms4 import previewer
+from .previewer_ui import Ui_Dialog
 
 
 # support for JS Booster add-on
@@ -48,7 +49,7 @@ class CardPreviewer(QDialog):
         self.mw = mw
         self.cid = cid
         self.highlight = highlight
-        self.form = previewer.Ui_Dialog()
+        self.form = Ui_Dialog()
         self.form.setupUi(self)
         self.setupEvents()
         self.setupUi()
@@ -64,7 +65,8 @@ class CardPreviewer(QDialog):
 
     def setupUi(self):
         self.web = AnkiWebView()
-        self.web.setLinkHandler(linkHandler)
+        # looks like the linkHandler only exists in certain windows now
+        # self.web.setLinkHandler(linkHandler)
         self.form.verticalLayout.insertWidget(0, self.web)
 
 
@@ -78,7 +80,7 @@ class CardPreviewer(QDialog):
         Set title and webview HTML
         """
         try:
-            card = self.mw.col.getCard(cid)
+            card = self.mw.col.getCard(int(cid))
         except TypeError:
             tooltip("Could not find linked card with cid:'{}'.".format(cid))
             return False
@@ -93,7 +95,7 @@ class CardPreviewer(QDialog):
             nid_idx = fnames.index("Note ID")
             if nid_idx == idx:
                 idx = min(idx+1, len(fields))
-        field1 = stripHTML(fields[idx])
+        field1 = strip_html(fields[idx])
         title = self.title.format(cid, field1[:50])
         self.setWindowTitle(title)
 
@@ -102,21 +104,24 @@ class CardPreviewer(QDialog):
         html = runFilter("previewerMungeQA", html)
 
         ti = lambda x: x
-        base = getBase(self.mw.col)
-        css = self.mw.reviewer._styles()
+        base = self.mw.baseHTML()
+        css = ["css/reviewer.css"]
         if preview_jsbooster:
             # JS Booster available
             baseUrlText = getBaseUrlText(self.mw.col) + "__previewer__.html"
             stdHtmlWithBaseUrl(self.web,
-                ti(mungeQA(self.mw.col, html)), baseUrlText, css,
-                bodyClass="card card%d" % (card.ord+1), 
-                head=base, js=browserSel)
+                ti(mw.prepare_card_text_for_display(html)), baseUrlText, css,
+                # bodyClass="card card%d" % (card.ord+1), 
+                head=base, js=None)
         else:
             # fall back to default
             self.web.stdHtml(
-                ti(mungeQA(self.mw.col, html)), css, 
-                bodyClass="card card%d" % (card.ord+1), 
-                head=base, js=browserSel)
+                mw.prepare_card_text_for_display(html), css, 
+                # looks like bodyClass is deprecated, we can add it in manually
+                # if we really need it
+                # bodyClass="card card%d" % (card.ord+1), 
+                head=base, js=None)
+            self.web.eval("document.body.className += ' card';")
 
         # Handle audio
         clearAudioQueue()
@@ -125,7 +130,7 @@ class CardPreviewer(QDialog):
 
 
     def setHighlight(self, highlight):
-        self.web.findText(highlight, QWebPage.HighlightAllOccurrences)
+        # I don't think this actually highlights anymore
         self.web.findText(highlight)
 
 
@@ -154,9 +159,11 @@ def hookedLinkHandler(self, url, _old=None):
 
 
 def linkHandler(url):
+    print('url', url)
     cmd, data = url.split(":")
     data_dict = dataDecode(data)
     if not data_dict or data_dict == "corrupted":
+        print('data_dict', data_dict)
         return False
 
     search = data_dict.get("src")
@@ -173,11 +180,10 @@ def openBrowseLink(search, highlight):
     browser = aqt.dialogs.open("Browser", aqt.mw)
     query = '''{}'''.format(search)
     browser.form.searchEdit.lineEdit().setText(query)
-    browser.onSearch()
+    browser.onSearchActivated()
     if not highlight or not browser.editor:
         return
-    browser.editor.web.findText(highlight,
-        QWebPage.HighlightAllOccurrences)
+    # this might not highlight anymore
     browser.editor.web.findText(highlight)
 
 
@@ -200,12 +206,13 @@ def profileLoaded():
 
 addHook("profileLoaded", profileLoaded)
 
-## Editor
-def onEditorWebInit(self, parent, editor):
-    self.setLinkHandler(self._linkHandler)
+# ## Editor
+# def onEditorWebInit(self, parent, editor):
+#     self.setLinkHandler(self._linkHandler)
+#     mw.web
 
-EditorWebView._linkHandler = hookedLinkHandler
-EditorWebView.__init__ = wrap(EditorWebView.__init__, onEditorWebInit, "after")
+# EditorWebView._linkHandler = hookedLinkHandler
+# EditorWebView.__init__ = wrap(EditorWebView.__init__, onEditorWebInit, "after")
 
 ## Reviewer
 Reviewer._linkHandler = wrap(Reviewer._linkHandler, hookedLinkHandler, "around")
